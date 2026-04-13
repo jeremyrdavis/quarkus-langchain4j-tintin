@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tintin AI Demo - Quarkus Langchain4j</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .header p { font-size: 1.1rem; opacity: 0.9; }
+        .subtitle { color: #fbd38d; font-weight: bold; }
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #2b6cb0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+        .feature-card h3 { color: #1a365d; margin-bottom: 0.5rem; font-size: 1.1rem; }
+        .feature-card .tag {
+            display: inline-block;
+            background: #ebf8ff;
+            color: #2b6cb0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .feature-card p { font-size: 0.9rem; color: #4a5568; margin-bottom: 1rem; }
+        .endpoint {
+            font-family: monospace;
+            background: #edf2f7;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #2d3748;
+        }
+        .method {
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-right: 4px;
+        }
+        .method-post { background: #c6f6d5; color: #22543d; }
+        .method-get { background: #bee3f8; color: #2a4365; }
+        .method-ws { background: #fefcbf; color: #744210; }
+        .try-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .try-section h2 { color: #1a365d; margin-bottom: 1rem; }
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 80px;
+        }
+        textarea:focus { outline: none; border-color: #2b6cb0; }
+        select, button {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        select { border: 2px solid #e2e8f0; background: white; margin-right: 0.5rem; }
+        button {
+            background: #2b6cb0;
+            color: white;
+            border: none;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        button:hover { background: #1a365d; }
+        button:disabled { background: #a0aec0; cursor: not-allowed; }
+        .controls { display: flex; align-items: center; gap: 0.5rem; margin: 1rem 0; }
+        #response {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 100px;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .links { text-align: center; margin-top: 2rem; }
+        .links a {
+            color: #2b6cb0;
+            text-decoration: none;
+            margin: 0 1rem;
+            font-weight: 600;
+        }
+        .links a:hover { text-decoration: underline; }
+        .spinner { display: none; }
+        .spinner.active { display: inline-block; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>The Adventures of Tintin AI</h1>
+        <p>A <span class="subtitle">Quarkus Langchain4j</span> demo featuring AI Services, RAG, Tools, Guardrails, and more</p>
+    </div>
+
+    <div class="container">
+        <div class="feature-grid">
+            <div class="feature-card">
+                <span class="tag">RAG + EasyRAG</span>
+                <h3>Tintin Expert</h3>
+                <p>Ask questions about Tintin using RAG over the actual book PDF. Includes source citations via Response Augmenter.</p>
+                <span class="method method-post">POST</span>
+                <span class="endpoint">/api/tintin/ask</span>
+            </div>
+
+            <div class="feature-card">
+                <span class="tag">Structured Output</span>
+                <h3>Character Analyzer</h3>
+                <p>Analyze Tintin characters and get structured JSON responses with records (name, description, traits, adventures).</p>
+                <span class="method method-post">POST</span>
+                <span class="endpoint">/api/tintin/character</span>
+            </div>
+
+            <div class="feature-card">
+                <span class="tag">Few-Shot Prompting</span>
+                <h3>Adventure Classifier</h3>
+                <p>Classify adventure descriptions into categories using few-shot examples embedded in the prompt.</p>
+                <span class="method method-post">POST</span>
+                <span class="endpoint">/api/tintin/classify</span>
+            </div>
+
+            <div class="feature-card">
+                <span class="tag">Image / Vision</span>
+                <h3>Cover Analyzer</h3>
+                <p>Analyze the Tintin book cover using GPT-4o vision via @ImageUrl and base64 Image type.</p>
+                <span class="method method-post">POST</span>
+                <span class="endpoint">/api/tintin/cover/describe</span>
+            </div>
+
+            <div class="feature-card">
+                <span class="tag">Tools + Function Calling</span>
+                <h3>Tintin Trivia</h3>
+                <p>Trivia expert using @Tool, @ToolBox with publication dates and character lookups. Demonstrates tool chaining.</p>
+                <span class="method method-post">POST</span>
+                <span class="endpoint">/api/tintin/trivia</span>
+            </div>
+
+            <div class="feature-card">
+                <span class="tag">Guardrails</span>
+                <h3>Guarded Service</h3>
+                <p>Input guardrails reject off-topic queries. Output guardrails validate response length. Try asking about stock prices!</p>
+                <span class="method method-post">POST</span>
+                <span class="endpoint">/api/tintin/guarded</span>
+            </div>
+
+            <div class="feature-card">
+                <span class="tag">Moderation</span>
+                <h3>Kids-Friendly Expert</h3>
+                <p>Family-friendly Tintin expert with @Moderate annotation for OpenAI content moderation.</p>
+                <span class="method method-post">POST</span>
+                <span class="endpoint">/api/tintin/moderated</span>
+            </div>
+
+            <div class="feature-card">
+                <span class="tag">WebSocket + Memory</span>
+                <h3>Adventure Chat</h3>
+                <p>Real-time chat with Tintin himself via WebSocket. @SessionScoped with automatic chat memory.</p>
+                <span class="method method-ws">WS</span>
+                <span class="endpoint">/adventure-chat</span>
+                <br><br>
+                <a href="/chat.html" style="color: #2b6cb0; font-weight: 600;">Open Chat UI</a>
+            </div>
+
+            <div class="feature-card">
+                <span class="tag">Streaming (SSE)</span>
+                <h3>Streaming Chat</h3>
+                <p>Token-by-token streaming via Server-Sent Events using Multi&lt;String&gt; return type.</p>
+                <span class="method method-get">GET</span>
+                <span class="endpoint">/api/tintin/chat/stream</span>
+            </div>
+        </div>
+
+        <div class="try-section">
+            <h2>Try It Out</h2>
+            <div class="controls">
+                <select id="endpoint">
+                    <option value="/api/tintin/ask" data-field="question">Tintin Expert (RAG)</option>
+                    <option value="/api/tintin/character" data-field="name">Character Analyzer</option>
+                    <option value="/api/tintin/classify" data-field="description">Adventure Classifier</option>
+                    <option value="/api/tintin/cover/describe" data-field="none">Cover Analyzer (URL)</option>
+                    <option value="/api/tintin/cover/analyze" data-field="none">Cover Analyzer (Base64)</option>
+                    <option value="/api/tintin/trivia" data-field="question">Tintin Trivia (Tools)</option>
+                    <option value="/api/tintin/guarded" data-field="question">Guarded Service</option>
+                    <option value="/api/tintin/moderated" data-field="question">Moderated Service</option>
+                </select>
+                <button id="sendBtn" onclick="sendRequest()">Send</button>
+                <span id="spinner" class="spinner">&#9881;</span>
+            </div>
+            <textarea id="input" placeholder="Enter your question or input here...">Who is Captain Haddock?</textarea>
+            <div id="response"></div>
+        </div>
+
+        <div class="links">
+            <a href="/q/dev-ui">Dev UI</a>
+            <a href="/q/metrics">Metrics</a>
+            <a href="/chat.html">WebSocket Chat</a>
+        </div>
+    </div>
+
+    <script>
+        const endpointSelect = document.getElementById('endpoint');
+        const inputArea = document.getElementById('input');
+        const responseDiv = document.getElementById('response');
+        const sendBtn = document.getElementById('sendBtn');
+        const spinner = document.getElementById('spinner');
+
+        endpointSelect.addEventListener('change', () => {
+            const field = endpointSelect.selectedOptions[0].dataset.field;
+            if (field === 'name') {
+                inputArea.placeholder = 'Enter a character name (e.g., Captain Haddock, Professor Calculus)';
+                inputArea.value = 'Captain Haddock';
+            } else if (field === 'description') {
+                inputArea.placeholder = 'Describe an adventure to classify...';
+                inputArea.value = 'Tintin infiltrates Soviet Russia to report on the Bolshevik regime and uncovers propaganda.';
+            } else if (field === 'none') {
+                inputArea.placeholder = 'No input needed - will analyze the Tintin cover image';
+                inputArea.value = '';
+            } else {
+                inputArea.placeholder = 'Enter your question...';
+                inputArea.value = 'Who is Captain Haddock?';
+            }
+        });
+
+        async function sendRequest() {
+            const endpoint = endpointSelect.value;
+            const field = endpointSelect.selectedOptions[0].dataset.field;
+            const input = inputArea.value;
+
+            sendBtn.disabled = true;
+            spinner.classList.add('active');
+            responseDiv.style.display = 'block';
+            responseDiv.textContent = 'Thinking...';
+
+            try {
+                let body = {};
+                if (field === 'question') body = { question: input };
+                else if (field === 'name') body = { name: input };
+                else if (field === 'description') body = { description: input };
+
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: field !== 'none' ? JSON.stringify(body) : '{}'
+                });
+
+                const contentType = res.headers.get('content-type') || '';
+                let text;
+                if (contentType.includes('application/json')) {
+                    const json = await res.json();
+                    text = JSON.stringify(json, null, 2);
+                } else {
+                    text = await res.text();
+                }
+
+                responseDiv.textContent = text;
+            } catch (e) {
+                responseDiv.textContent = 'Error: ' + e.message;
+            } finally {
+                sendBtn.disabled = false;
+                spinner.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
