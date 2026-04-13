@@ -22,25 +22,29 @@ public class CoverAnalyzerResource {
 
     @POST
     @Path("/describe")
-    public String describeCover() {
-        String imageUrl = "http://localhost:8080/images/tintin-image.png";
-        return analyzer.describeCover(imageUrl);
+    public String describeCover() throws IOException {
+        Image image = loadCoverImage();
+        return analyzer.describeCover(image);
     }
 
     @POST
     @Path("/analyze")
     public String analyzeArtStyle() throws IOException {
+        Image image = loadCoverImage();
+        return analyzer.analyzeArtStyle(image);
+    }
+
+    private Image loadCoverImage() throws IOException {
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("META-INF/resources/images/tintin-image.png")) {
             if (is == null) {
-                return "Error: tintin-image.png not found in resources";
+                throw new IOException("tintin-image.png not found in resources");
             }
             byte[] bytes = is.readAllBytes();
             String b64 = Base64.getEncoder().encodeToString(bytes);
-            Image image = Image.builder()
+            return Image.builder()
                     .base64Data(b64)
                     .mimeType("image/png")
                     .build();
-            return analyzer.analyzeArtStyle(image);
         }
     }
 }

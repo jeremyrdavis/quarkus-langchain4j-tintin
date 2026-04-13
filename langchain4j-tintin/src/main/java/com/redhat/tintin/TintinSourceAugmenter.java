@@ -13,6 +13,7 @@ public class TintinSourceAugmenter implements AiResponseAugmenter<String> {
     @Override
     public String augment(String response, ResponseAugmenterParams params) {
         List<Content> contents = params.augmentationResult() != null
+                && params.augmentationResult().contents() != null
                 ? params.augmentationResult().contents()
                 : List.of();
 
@@ -21,9 +22,13 @@ public class TintinSourceAugmenter implements AiResponseAugmenter<String> {
         }
 
         StringBuilder augmented = new StringBuilder(response);
-        augmented.append("\n\n---\n**Sources:**\n");
+        augmented.append("\n\n---\nSources:\n");
         for (int i = 0; i < contents.size(); i++) {
-            String segment = contents.get(i).textSegment().text();
+            var textSegment = contents.get(i).textSegment();
+            if (textSegment == null || textSegment.text() == null) {
+                continue;
+            }
+            String segment = textSegment.text();
             String preview = segment.length() > 100 ? segment.substring(0, 100) + "..." : segment;
             augmented.append("- Source ").append(i + 1).append(": \"").append(preview).append("\"\n");
         }
