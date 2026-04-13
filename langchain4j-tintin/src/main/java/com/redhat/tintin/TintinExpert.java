@@ -4,10 +4,8 @@ import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
 import io.quarkiverse.langchain4j.response.ResponseAugmenter;
-import jakarta.enterprise.context.SessionScoped;
 
 @RegisterAiService
-@SessionScoped
 public interface TintinExpert {
 
     @SystemMessage("""
