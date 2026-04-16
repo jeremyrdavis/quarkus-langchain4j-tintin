@@ -6,6 +6,7 @@ com/redhat/tintin/AdventureClassifierResource.class
 com/redhat/tintin/tools/DateCalculatorTool.class
 com/redhat/tintin/guardrails/TintinTopicGuardrail.class
 com/redhat/tintin/CharacterAnalyzerResource.class
+com/redhat/tintin/CoverAnalyzerResource$CoverRequest.class
 com/redhat/tintin/moderation/ModerationResource.class
 com/redhat/tintin/guardrails/GuardedResource.class
 com/redhat/tintin/chat/AdventureChatBot.class

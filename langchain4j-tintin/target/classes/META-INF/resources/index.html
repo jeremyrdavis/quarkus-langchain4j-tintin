@@ -139,8 +139,8 @@
                     <option value="/api/tintin/ask" data-field="question">Tintin Expert (RAG)</option>
                     <option value="/api/tintin/character" data-field="name">Character Analyzer</option>
                     <option value="/api/tintin/classify" data-field="description">Adventure Classifier</option>
-                    <option value="/api/tintin/cover/describe" data-field="none">Cover Analyzer (URL)</option>
-                    <option value="/api/tintin/cover/analyze" data-field="none">Cover Analyzer (Base64)</option>
+                    <option value="/api/tintin/cover/describe" data-field="url">Cover Analyzer (Describe)</option>
+                    <option value="/api/tintin/cover/analyze" data-field="url">Cover Analyzer (Art Style)</option>
                     <option value="/api/tintin/trivia" data-field="question">Tintin Trivia (Tools)</option>
                     <option value="/api/tintin/guarded" data-field="question">Guarded Service</option>
                     <option value="/api/tintin/moderated" data-field="question">Moderated Service</option>
@@ -180,7 +180,7 @@
             <div class="feature-card">
                 <span class="tag">Image / Vision</span>
                 <h3>Cover Analyzer</h3>
-                <p>Analyze the Tintin book cover using GPT-4o vision via @ImageUrl and base64 Image type.</p>
+                <p>Analyze any book cover using GPT-4o vision. Paste an image URL or use the bundled Tintin cover.</p>
                 <span class="method method-post">POST</span>
                 <span class="endpoint">/api/tintin/cover/describe</span>
             </div>
@@ -250,8 +250,8 @@
             } else if (field === 'description') {
                 inputArea.placeholder = 'Describe an adventure to classify...';
                 inputArea.value = 'Tintin infiltrates Soviet Russia to report on the Bolshevik regime and uncovers propaganda.';
-            } else if (field === 'none') {
-                inputArea.placeholder = 'No input needed - will analyze the Tintin cover image';
+            } else if (field === 'url') {
+                inputArea.placeholder = 'Enter an image URL, or leave blank to use the bundled Tintin cover';
                 inputArea.value = '';
             } else {
                 inputArea.placeholder = 'Enter your question...';
@@ -274,11 +274,12 @@
                 if (field === 'question') body = { question: input };
                 else if (field === 'name') body = { name: input };
                 else if (field === 'description') body = { description: input };
+                else if (field === 'url' && input.trim()) body = { url: input.trim() };
 
                 const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: field !== 'none' ? JSON.stringify(body) : '{}'
+                    body: JSON.stringify(body)
                 });
 
                 const contentType = res.headers.get('content-type') || '';
